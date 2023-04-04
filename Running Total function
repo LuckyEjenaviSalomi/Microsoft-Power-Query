@@ -1,0 +1,23 @@
+/*TabName = Name of the Table to implement running total on, RT_Amt_ColumnName = the column with the amount to sum, 
+Added_Col_RT_Name = custom name for the added column */
+
+(TabName as table, RT_Amt_ColumnName as text, Added_Col_RT_Name as text)=>
+let
+    // Amount List to apply List.Generate on
+    Amt_List = List.Buffer(Table.Column(TabName, RT_Amt_ColumnName)),
+
+    // List.Generate calculates the running total
+    RT_List = List.Generate(
+                () => [RT = Amt_List{0}, counter = 0],
+                each [counter] < List.Count(Amt_List),
+                each [RT = List.Sum({[RT], Amt_List{counter}}), counter = [counter] + 1],
+                each [RT]
+            ),
+
+    // Consolidate brings the table together with the running total
+    Consolidate = Table.FromColumns(Table.ToColumns(
+                    TabName
+                ) & {RT_List}, Table.ColumnNames(TabName) & {Added_Col_RT_Name}
+                )
+in
+    Consolidate
