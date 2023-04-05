@@ -3,7 +3,7 @@ let
     Source = List.Generate(
         ()=> [x = 1, y = 1, count = 1], //Initialized values
         each [count] <= n_sequence, //condition to stop iteration
-        each [count = [count] + 1, x = [y], y = [x] + x], //Next values
+        each [count = [count] + 1, x = [y], y = [x] + x], //Next values - x = previous y, y = previous x + new x
         each [y] //values to return to the list
     )
 in
