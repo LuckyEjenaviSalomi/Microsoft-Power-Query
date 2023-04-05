@@ -7,5 +7,4 @@ let
         each [y] //values to return to the list
     )
 in
-
 Source
