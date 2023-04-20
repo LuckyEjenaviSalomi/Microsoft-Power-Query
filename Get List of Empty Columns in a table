@@ -1,0 +1,8 @@
+(tbl as table) =>
+
+let 
+    col_names = Table.ColumnNames(tbl), //get column names
+    rec = List.Transform(col_names, each [col_name = _, is_null = Is_Null_Column_Values(tbl, _)]) //record of columns and check if they are empty
+in 
+    // return the names of empty columns
+    List.Transform(List.Select(rec, each  _[is_null]), each _[col_name])
