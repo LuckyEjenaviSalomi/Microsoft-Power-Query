@@ -3,6 +3,7 @@
 
 let
     col_names = Table.ColumnNames(tbl), // get column names
+    tbl_no_erors =  Table.ReplaceErrorValues(tbl, List.Transform(col_names, each {_, null})), //remove errors
 
 // fx to check if column has null or empty values
    Is_Null_Column_Values = (tbl as table, col_name)  => 
@@ -26,4 +27,4 @@ let
         in  List.Select(col_states, each _ <> null )
 
 in 
-   Table.SelectColumns(tbl, non_empty_columns(tbl))
+   Table.SelectColumns(tbl, non_empty_columns(tbl_no_erors))
