@@ -1,18 +1,27 @@
-(tbl as table) =>
-let
-    Headers = Table.ColumnNames(tbl),
+(tbl as table, optional possible_empty_values_list as any) =>
 
-    fnMyAccumulator =
-        (tbl as table, columnName as text) as table =>
-            if List.MatchesAll(Table.Column(tbl, columnName), each _ is null) then     
-                Table.RemoveColumns(tbl, {columnName})
-            else
-                tbl,
-    
-    myAccumulatedResult = List.Accumulate(
-        Headers,
-        tbl,
-        (tbl, columnName) => fnMyAccumulator(tbl, columnName)
-    )
-in
-    myAccumulatedResult
+let
+    col_names = Table.ColumnNames(tbl), // get column names
+
+// fx to check if column has null or empty values
+   Is_Null_Column_Values = (tbl as table, col_name)  => 
+
+        let
+            empty_values_list = if List.IsEmpty(possible_empty_values_list) then {null, "", " "} else                                       possible_empty_values_list,
+            is_null_all = List.MatchesAll(Table.Column(tbl, col_name) , each  List.ContainsAny(empty_values_list, {_}) )
+        in
+            is_null_all,
+
+    // fx to get col names of empty or null columns
+    non_empty_columns =  (tbl as table)=>
+        let col_states =
+                List.Generate(
+                    ()=> [col = col_names{count}, count = 0, is_null = Is_Null_Column_Values(tbl, col)],
+                    each [count] < List.Count(col_names),
+                    each [col = col_names{count}, count = [count] + 1, is_null = Is_Null_Column_Values(tbl, col)],
+                    each [ col = if not [is_null] then [col] else null ][col]
+                )
+        in  List.Select(col_states, each _ <> null )
+
+in 
+   Table.SelectColumns(tbl, non_empty_columns(tbl))
