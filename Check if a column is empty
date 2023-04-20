@@ -1,0 +1,5 @@
+(tbl as table, col_name)  => 
+let
+    is_null_all = List.MatchesAll(Table.Column(tbl, col_name) , each  _ = null) 
+in
+    is_null_all
