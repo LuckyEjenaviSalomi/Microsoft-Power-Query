@@ -1,4 +1,5 @@
-(tbl as table, optional possible_empty_values_list as any) =>
+// return table with blank columns removed
+(tbl as table) =>
 
 let
     col_names = Table.ColumnNames(tbl), // get column names
@@ -7,8 +8,9 @@ let
    Is_Null_Column_Values = (tbl as table, col_name)  => 
 
         let
-            empty_values_list = if List.IsEmpty(possible_empty_values_list) then {null, "", " "} else                                       possible_empty_values_list,
-            is_null_all = List.MatchesAll(Table.Column(tbl, col_name) , each  List.ContainsAny(empty_values_list, {_}) )
+            empty_values_list = {null, ""},
+            col_values = List.Transform(Table.Column(tbl, col_name), each try Text.Trim(_) otherwise _), //remove spaces
+            is_null_all = List.MatchesAll(col_values , each  List.ContainsAny(empty_values_list, {_}) )
         in
             is_null_all,
 
