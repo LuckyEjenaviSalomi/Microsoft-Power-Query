@@ -1,0 +1,18 @@
+(tbl as table) =>
+let
+    Headers = Table.ColumnNames(tbl),
+
+    fnMyAccumulator =
+        (tbl as table, columnName as text) as table =>
+            if List.MatchesAll(Table.Column(tbl, columnName), each _ is null) then     
+                Table.RemoveColumns(tbl, {columnName})
+            else
+                tbl,
+    
+    myAccumulatedResult = List.Accumulate(
+        Headers,
+        tbl,
+        (tbl, columnName) => fnMyAccumulator(tbl, columnName)
+    )
+in
+    myAccumulatedResult
