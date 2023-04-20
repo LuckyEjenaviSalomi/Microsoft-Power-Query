@@ -1,7 +1,7 @@
 (tbl as table, optional FIXED_COL_COUNT as number) =>
     let
-        column_count = if FIXED_COL_COUNT = null then 30 else FIXED_COL_COUNT,
-        num_of_cols = if Table.ColumnCount(tbl) > column_count then column_count else Table.ColumnCount(tbl),
+        FIXED_COL_COUNT = if FIXED_COL_COUNT = null then 30 else FIXED_COL_COUNT,
+        num_of_cols = if Table.ColumnCount(tbl) > FIXED_COL_COUNT then FIXED_COL_COUNT else Table.ColumnCount(tbl),
 
         select_columns = 
         let source = List.Generate(
@@ -13,4 +13,4 @@
         in
             source
 
-    in select_columns
+    in Table.SelectColumns(tbl,  select_columns)
