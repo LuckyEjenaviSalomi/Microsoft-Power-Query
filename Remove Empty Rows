@@ -1,0 +1,19 @@
+// return a table with empty rows removed
+(tbl as table) =>
+let
+    empties_list = {null, ""}, //null = original null value, "" = after applying text.trim transformation
+
+    //Add helper column to be used to filter non-empty rows
+    AddedCustom = 
+        Table.AddColumn(tbl, "Custom", 
+        each 
+            let 
+                //convert each record to list and remove empty spaces in each list
+                record_values = List.Transform(Record.ToList(_), each Text.Trim(_)) 
+            in List.MatchesAll(record_values, each List.ContainsAny(empties_list, {_}) ) //evaluate empties in each record and return a boolean
+        ),
+
+    // filter out empty or null record
+    Filter_out_empty_rows = Table.SelectRows(AddedCustom, each [Custom] = false) 
+in
+    Table.RemoveColumns(Filter_out_empty_rows, {"Custom"}) //Remove helper column added
