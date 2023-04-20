@@ -1,0 +1,6 @@
+// return a table with all errors replaced with specified value or null
+(tbl as table, optional replacer_value) =>
+let 
+    col_names = Table.ColumnNames(tbl)
+in
+    Table.ReplaceErrorValues(tbl, List.Transform(col_names, each {_, replacer_value}))
