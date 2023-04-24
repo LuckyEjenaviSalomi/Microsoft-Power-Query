@@ -1,0 +1,16 @@
+(tbl as table, col_to_split_name) =>
+
+let
+    Source = tbl,
+    CONST_FX_DELIMITER = "<>@=;", //Used to temporarily text in the function
+    RemoveDelimiter = Table.TransformColumns(
+                Source, {
+                {col_to_split_name, each let val = Text.ToList(Replacer.ReplaceText(_, " ", "")) 
+                in Text.Combine({Text.Combine(List.Select(val, each List.Contains({"0".."9"}, _))) , 
+                    Text.Combine(List.Select(val, each List.Contains({"a".."z", "A".."Z"}, _)))}, CONST_FX_DELIMITER)}
+                }
+                ),
+    new_col_names = List.Transform({1..2}, each col_to_split_name & "." & Text.From(_)),
+    SplitColumnByDelimiter = Table.SplitColumn(RemoveDelimiter, col_to_split_name, Splitter.SplitTextByDelimiter(CONST_FX_DELIMITER, QuoteStyle.Csv), new_col_names)
+in
+    SplitColumnByDelimiter
