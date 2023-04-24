@@ -1,0 +1,10 @@
+(tbl as table, col_to_split_name as text, delimiter as any, optional new_col_name_prefix as nullable text)=>
+
+let
+    Source = tbl,
+    ColNames = List.Transform({1..List.Max(List.Transform(Table.Column(Source, colName), each List.Count(Text.Split(_, delimiter))))}, each (if newColNamePrefix = null then colName else newColNamePrefix) & "." & Text.From(_)),
+
+    SplitColumnByDelimiter = Table.SplitColumn(Source, colName, Splitter.SplitTextByDelimiter(delimiter, QuoteStyle.Csv), ColNames)
+
+in
+    SplitColumnByDelimiter
