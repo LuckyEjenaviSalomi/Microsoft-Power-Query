@@ -10,7 +10,9 @@ let
                     Text.Combine(List.Select(val, each List.Contains({"a".."z", "A".."Z"}, _)))}, CONST_FX_DELIMITER)}
                 }
                 ),
-    new_col_names =  {"Number", "Text"},
-    SplitColumnByDelimiter = Table.SplitColumn(RemoveDelimiter, col_to_split_name, Splitter.SplitTextByDelimiter(CONST_FX_DELIMITER, QuoteStyle.Csv), new_col_names)
+    new_col_names = {"Number", "Text"},
+    SplitColumnByDelimiter = Table.SplitColumn(RemoveDelimiter, col_to_split_name, Splitter.SplitTextByDelimiter(CONST_FX_DELIMITER, QuoteStyle.Csv), new_col_names),
+
+    result = Table.TransformColumnTypes(SplitColumnByDelimiter, {{new_col_names{0}, Int64.Type}, {new_col_names{1}, type text}})
 in
-    SplitColumnByDelimiter
+    result
