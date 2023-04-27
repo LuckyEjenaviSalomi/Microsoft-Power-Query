@@ -1,0 +1,5 @@
+(num as number, multiple as number) =>
+let result =
+Number.Round(num/multiple,0, RoundingMode.AwayFromZero) * multiple
+
+in result
