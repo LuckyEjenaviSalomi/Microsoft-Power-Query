@@ -1,0 +1,10 @@
+(txt as text)=>
+
+let 
+   //intermediate function - test if a text value is a preposition
+   is_preposition = (txt)=>
+      List.Contains({"OF", "ON", "IN"}, Text.Upper(txt)),
+
+   list_ = List.Transform(Text.Split(txt, " "), each if is_preposition(_) then Text.Lower(_) else Text.Proper(_)  )
+
+   in Text.Combine(list_, " ")
