@@ -7,4 +7,5 @@ let
 
    list_ = List.Transform(Text.Split(txt, " "), each if is_preposition(_) then Text.Lower(_) else Text.Proper(_)  )
 
-   in Text.Combine(list_, " ")
+  in Text.Replace(Text.Combine(list_, " "), "'S", "'s") //Replace 'S to 's
+  
