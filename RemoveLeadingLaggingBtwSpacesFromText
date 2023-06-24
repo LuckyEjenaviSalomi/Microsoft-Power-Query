@@ -1,0 +1,11 @@
+(string as text)=>
+Text.Trim(
+    Text.Combine(
+        List.Select(
+            Text.Split(
+                string, " "
+            ), each _ <> ""
+        ), 
+        " "  
+    )
+)
