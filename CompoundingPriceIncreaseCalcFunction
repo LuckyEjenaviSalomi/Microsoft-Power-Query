@@ -1,0 +1,19 @@
+(tab as table, DateColName as text, PercentagePriceIncreaseColName as text)=>
+
+let
+    Source =Table.Sort(tab,{{DateColName, Order.Ascending}}),
+    ChangedType = Table.TransformColumnTypes(Source,{{DateColName, type date}, {PercentagePriceIncreaseColName, type number}}),
+    BufferedPriceIncrease = List.Buffer(Table.Column(ChangedType, PercentagePriceIncreaseColName)),
+
+    PriceIncreaseListGenerate = List.Generate(
+    ()=> [x = BufferedPriceIncrease {count} ?? 1, count = 0],
+    each [count] < List.Count(BufferedPriceIncrease),
+    each [count = [count] + 1, x = [x] * (1 + (BufferedPriceIncrease{count}?? 0))],
+    each [x]
+    
+),
+    AddedIndex = Table.AddIndexColumn(ChangedType, "Index", 0, 1, Int64.Type),
+    AddPriceAccumulator = Table.AddColumn(AddedIndex, "Price Accumulator", each PriceIncreaseListGenerate{[Index]}, type number),
+    RemovedColumns = Table.RemoveColumns(AddPriceAccumulator,{"Index"})
+in
+   RemovedColumns
