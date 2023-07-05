@@ -2,7 +2,9 @@
 
 let
     Source =  Text.ToList(string_),
-    List_To_Boolean = List.Transform(Source, each try Value.Is(Number.From(_), Int64.Type) otherwise false)
+
+    //return true if number
+    List_To_Boolean = List.Transform(Source, each try Value.Is(Number.From(_), Int64.Type) otherwise false) 
 
 in
     List.Contains(List_To_Boolean, true)
