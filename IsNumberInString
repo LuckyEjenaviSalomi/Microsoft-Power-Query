@@ -1,3 +1,4 @@
+//Function Checks if String contains Number
 (string_ as text) =>
 
 let
