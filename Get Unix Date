@@ -1,0 +1,9 @@
+(date_ as date) =>
+
+let 
+    days = Duration.Days((date_ - #date(1970, 1, 1))), //Days duration
+    days_to_hours = days * 24,
+    hours_to_minutes = days_to_hours * 60,
+    minutes_to_seconds = hours_to_minutes * 60
+in
+    minutes_to_seconds
