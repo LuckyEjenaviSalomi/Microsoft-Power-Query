@@ -1,30 +1,32 @@
 // return table with blank columns removed
-(tbl as table) =>
+(tbl as table)=>
 
-let
-    col_names = Table.ColumnNames(tbl), // get column names
-    tbl_no_erors =  Table.ReplaceErrorValues(tbl, List.Transform(col_names, each {_, null})), //remove errors
+let 
+//Function to get all the empty columns
+fxGetEmptyColumns = 
+            (tbl as table)=>
 
-// fx to check if column has null or empty values
-   Is_Null_Column_Values = (tbl as table, col_name)  => 
+            let ColNames = Table.ColumnNames(tbl),
 
-        let
-            empty_values_list = {null, ""},
-            col_values = List.Transform(Table.Column(tbl, col_name), each try Text.Trim(_) otherwise _), //remove spaces
-            is_null_all = List.MatchesAll(col_values , each  List.ContainsAny(empty_values_list, {_}) )
-        in
-            is_null_all,
+            //============Function to check if a column is empty
+            fxIsColumnEmpty = 
+                    (tbl as table, colName as text) =>
+                    let
+                        RemovedOtherColumns = Table.SelectColumns(tbl,{colName}),
+                        change_col_data_type = Table.TransformColumnTypes(tbl, {colName, type text}),
+                        TrimmedText = Table.TransformColumns(change_col_data_type,{{colName, Text.Trim}}),
+                        ReplacedValue = Table.ReplaceValue(TrimmedText,"",null,Replacer.ReplaceValue,{colName})
+                    in
+                        List.MatchesAll(Table.Column(ReplacedValue, colName), each _ = null),
+            //===========================================================================
 
-    // fx to get col names of empty or null columns
-    non_empty_columns =  (tbl as table)=>
-        let col_states =
-                List.Generate(
-                    ()=> [col = col_names{count}, count = 0, is_null = Is_Null_Column_Values(tbl, col)],
-                    each [count] < List.Count(col_names),
-                    each [col = col_names{count}, count = [count] + 1, is_null = Is_Null_Column_Values(tbl, col)],
-                    each [ col = if not [is_null] then [col] else null ][col]
-                )
-        in  List.Select(col_states, each _ <> null )
+            emptyCols = List.Accumulate(
+                ColNames,
+                {}, (state, curr)=> if fxIsColumnEmpty(tbl, curr) then state & {curr} else state & {}
+            )
 
-in 
-   Table.SelectColumns(tbl, non_empty_columns(tbl_no_erors))
+            in emptyCols
+//=====================================================
+
+in
+Table.RemoveColumns(tbl, fxGetEmptyColumns(tbl))
