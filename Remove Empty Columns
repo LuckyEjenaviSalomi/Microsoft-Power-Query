@@ -1,4 +1,4 @@
-// return table with blank columns removed
+//Return a table without empty columns
 (tbl as table)=>
 
 let 
@@ -15,14 +15,15 @@ fxGetEmptyColumns =
                         RemovedOtherColumns = Table.SelectColumns(tbl,{colName}),
                         change_col_data_type = Table.TransformColumnTypes(tbl, {colName, type text}),
                         TrimmedText = Table.TransformColumns(change_col_data_type,{{colName, Text.Trim}}),
-                        ReplacedValue = Table.ReplaceValue(TrimmedText,"",null,Replacer.ReplaceValue,{colName})
+                        ReplacedValue = Table.ReplaceValue(TrimmedText,"",null,Replacer.ReplaceValue,{colName}),
+                        table_to_list = Table.Column(ReplacedValue, colName)
                     in
-                        List.MatchesAll(Table.Column(ReplacedValue, colName), each _ = null),
+                        List.MatchesAll(table_to_list, each _ = null),
             //===========================================================================
 
             emptyCols = List.Accumulate(
                 ColNames,
-                {}, (state, curr)=> if fxIsColumnEmpty(tbl, curr) then state & {curr} else state & {}
+                {}, (state, curr)=> if fxIsColumnEmpty(tbl, curr) then state & {curr} else {}
             )
 
             in emptyCols
