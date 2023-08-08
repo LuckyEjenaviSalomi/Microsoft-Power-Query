@@ -1,7 +1,8 @@
 //Function to get all the empty columns
 (tbl as table)=>
 
-let ColNames = Table.ColumnNames(tbl),
+let 
+ColNames = Table.ColumnNames(tbl),
 
 //============Function returns column name if column is empty or null if otherwise=============
 fxIsColumnEmpty = 
