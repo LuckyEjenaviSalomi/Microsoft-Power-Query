@@ -7,7 +7,8 @@ let
         let
             record_to_list = Record.ToList(record_),
             converted_to_Table = Table.FromList(record_to_list, Splitter.SplitByNothing(), null, null, ExtraValues.Error),
-            TrimmedText = Table.TransformColumns(Table.TransformColumnTypes(converted_to_Table, {{"Column1", type text}}),{{"Column1", Text.Trim, type text}}),
+            TrimmedText = Table.TransformColumns(Table.TransformColumnTypes(converted_to_Table, {{"Column1", type text}}), 
+                                {{"Column1", Text.Trim, type text}}),
             ReplacedValue = Table.ReplaceValue(TrimmedText,"",null,Replacer.ReplaceValue,{"Column1"})[Column1]
         in
             List.MatchesAll(ReplacedValue, each _ = null)
