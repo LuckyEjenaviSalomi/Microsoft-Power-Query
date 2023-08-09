@@ -1,28 +1,33 @@
-//Function to get all the empty columns
+//Return a table without empty columns
 (tbl as table)=>
 
 let 
-ColNames = Table.ColumnNames(tbl),
+//Function to get all the empty columns
+fxGetEmptyColumns = 
+            (tbl as table)=>
 
-//============Function returns column name if column is empty or null if otherwise=============
-fxIsColumnEmpty = 
-        (tbl as table, colName as text) =>
-        let
-            RemovedOtherColumns = Table.SelectColumns(tbl,{colName}),
-            change_col_data_type = Table.TransformColumnTypes(tbl, {colName, type text}),
-            TrimmedText = Table.TransformColumns(change_col_data_type,{{colName, Text.Trim}}),
-            ReplacedValue = Table.ReplaceValue(TrimmedText,"",null,Replacer.ReplaceValue,{colName}),
-            table_to_list = Table.Column(ReplacedValue, colName)
-        in
-           if List.MatchesAll(table_to_list, each _ = null) then colName else null,
-//===========================================================================
-emptyCols = 
-    List.Generate(
-        ()=> [index = 0, colName = ColNames{index},  col = fxIsColumnEmpty(tbl, colName)],
-        each [index] < List.Count(ColNames),
-        each [index = [index] + 1, colName = ColNames{index}, col = fxIsColumnEmpty(tbl, colName)],
-        each [col]
-    )
+            let ColNames = Table.ColumnNames(tbl),
 
-in List.RemoveNulls(emptyCols)
+            //============Function to check if a column is empty
+            fxIsColumnEmpty = 
+                    (tbl as table, colName as text) =>
+                        let
+                            RemovedOtherColumns = Table.Buffer(Table.SelectColumns(tbl,{colName})),
+                            change_col_data_type = Table.TransformColumnTypes(tbl, {colName, type text}),
+                            TrimmedText = Table.TransformColumns(change_col_data_type,{{colName, Text.Trim}}),
+                            ReplacedValue = Table.ReplaceValue(TrimmedText,"",null,Replacer.ReplaceValue,{colName}),
+                            table_to_list = List.Buffer(Table.Column(ReplacedValue, colName))
+                        in
+                            List.MatchesAll(table_to_list, each _ = null),
+            //===========================================================================
+
+            emptyCols = List.Accumulate(
+                ColNames,
+                {}, (state, curr)=> if fxIsColumnEmpty(tbl, curr) then state & {curr} else state & {}
+            )
+
+            in emptyCols
 //=====================================================
+
+in
+Table.RemoveColumns(tbl, fxGetEmptyColumns(tbl))
