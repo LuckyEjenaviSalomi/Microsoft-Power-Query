@@ -8,9 +8,9 @@ let
 
     // List.Generate calculates the running total
     RT_List = List.Generate(
-                () => [RT = Amt_List{0}, counter = 0],
+                () => [counter = 0, RT = Amt_List{counter}],
                 each [counter] < List.Count(Amt_List),
-                each [RT = List.Sum({[RT], Amt_List{counter}}), counter = [counter] + 1],
+                each [ counter = [counter] + 1, RT = List.Sum({[RT], Amt_List{counter}}) ],
                 each [RT]
             ),
 
