@@ -1,0 +1,7 @@
+(txt)=>
+let
+    txt_list = Text.ToList(txt),
+    fx = (x)=> (if x <> " " then (try Number.From(x) otherwise x) else x) is text,
+    list_check = List.Select(txt_list, each fx(_))
+in
+    Text.Combine(list_check)
