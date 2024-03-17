@@ -1,9 +1,21 @@
 /* Returns true or false if any of the list values is contained in search text
-Values_to_filter_sep_by_comma = values to search seperated by comma like "a, b, c, d, ..."
+Values_to_filter_sep_by_comma = values to search seperated by a delimiter like "a, b, c, d, ..."
 search_columnValue = search text
 */
-(Values_to_filter_sep_by_comma as text, search_columnValue as text)=>
-    let values_split = Text.Split(Values_to_filter_sep_by_comma, ", ")
+(Values_to_filter_sep_by_comma as text, text_delimiter as text, search_columnValue as text)=>
+
+    let 
+    delimiter = if text_delimiter = "" or text_delimiter = null then  "," else text_delimiter, //check if empty
+
+    // Intermediate function - Remove the last comma if no value is after
+    remove_last_comma = (x)=> 
+        let pos = Text.PositionOf(x, delimiter, Occurrence.All),
+        textlen = Text.Length(x),
+        result = if List.Last(pos) = textlen - 1 then Text.RemoveRange(x, textlen - 1, 1) else x
+        in result,
+    // ------------------------------
+
+    values_split = List.Select(Text.Split(remove_last_comma(Values_to_filter_sep_by_comma), delimiter), each Text.Trim(_) <> "")
     in
     List.MatchesAny(
         values_split, 
