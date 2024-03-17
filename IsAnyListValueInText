@@ -1,0 +1,11 @@
+/* Returns true or false if any of the list values is contained in search text
+Values_to_filter_sep_by_comma = values to search seperated by comma like "a, b, c, d, ..."
+search_columnValue = search text
+*/
+(Values_to_filter_sep_by_comma as text, search_columnValue as text)=>
+    let values_split = Text.Split(Values_to_filter_sep_by_comma, ", ")
+    in
+    List.MatchesAny(
+        values_split, 
+        (r)=> Text.Contains(Text.Trim(search_columnValue), Text.Trim(r), Comparer.OrdinalIgnoreCase)
+        )
