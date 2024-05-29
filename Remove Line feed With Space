@@ -1,0 +1,2 @@
+(txt as text)=>
+Text.Replace(txt, "#(lf)", " ")
