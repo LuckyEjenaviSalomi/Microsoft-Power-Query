@@ -1,0 +1,8 @@
+(value)=>
+let
+    Source = Text.From(value), //To prevent the next step from crashing
+    SplitValue = Text.ToList(Source),
+    TypecastNumbers = List.Transform(SplitValue, each try Number.From(_) otherwise _),
+    EvaluateIfContainsText = List.MatchesAny(TypecastNumbers, each _ is text)
+in
+    EvaluateIfContainsText
