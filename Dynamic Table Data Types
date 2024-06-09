@@ -1,7 +1,7 @@
 //Automatically Returns Data Type of Tables Dynamically without hardcoding column names
 (tbl as table, optional N_Rows as number)=>
 let
-    firstN = (if N_Rows = null then 100 else N_Rows),
+    firstN = ( if N_Rows <> null then N_Rows else Table.RowCount(tbl) ),
     trim_table_to_rows = Table.FirstN(tbl, firstN), //Get the first N rows of table to speed things up
     ColNames = Table.ColumnNames(trim_table_to_rows), //Column Names
     ColValues = List.Transform(Table.ToColumns(trim_table_to_rows), each List.RemoveNulls(_)), //Get Column Values after removing nulls
