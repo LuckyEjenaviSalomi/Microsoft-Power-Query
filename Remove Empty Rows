@@ -1,18 +1,7 @@
 // return a table with empty rows removed
-(tbl as table) as table =>
-
-let 
-    IsEmptyRecord = (record_ as record) =>
-        (
-        let
-            record_to_list = Record.ToList(record_),
-            converted_to_Table = Table.FromList(record_to_list, Splitter.SplitByNothing(), null, null, ExtraValues.Error),
-            TrimmedText = Table.TransformColumns(Table.TransformColumnTypes(converted_to_Table, {{"Column1", type text}}), 
-                                {{"Column1", Text.Trim, type text}}),
-            ReplacedValue = Table.ReplaceValue(TrimmedText,"",null,Replacer.ReplaceValue,{"Column1"})[Column1]
-        in
-            List.MatchesAll(ReplacedValue, each _ = null)
-            )
-
+(tbl as table)=>
+let
+    CountNonNullColumns = Table.AddColumn(tbl, "Custom", each List.NonNullCount(Record.FieldValues(_))), //Check the count of non-null columns
+    RemoveNullRows = Table.SelectRows(CountNonNullColumns, each ([Custom] <> 0)) //Remove records with zero non-null count
 in
-    Table.SelectRows(tbl, each not IsEmptyRecord(_))
+    Table.RemoveColumns(RemoveNullRows,{"Custom"})
