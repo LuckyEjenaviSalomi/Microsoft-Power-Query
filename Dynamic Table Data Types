@@ -1,0 +1,13 @@
+//Automatically Returns Data Type of Tables Dynamically without hardcoding column names
+(tbl as table, N_Rows as nullable number)=>
+let
+    firstN = (if N_Rows = null then 100 else N_Rows),
+    trim_table_to_rows = Table.FirstN(tbl, firstN), //Get the first N rows of table to speed things up
+    ColNames = Table.ColumnNames(trim_table_to_rows), //Column Names
+    ColValues = List.Transform(Table.ToColumns(trim_table_to_rows), each List.RemoveNulls(_)), //Get Column Values after removing nulls
+    RemoveNulls = List.Transform(ColValues, each List.RemoveNulls(_)), // In case column has preceding null values before a real value
+    FirstItem = List.Transform(RemoveNulls, each if List.Count(_) = 0 then null else List.First(_)), //Return null where column is empty
+    DataTypes = List.Transform(FirstItem, each if _ = null then Any.Type else Value.Type(_)), //Get Data Type based on first value
+    Col_and_DataTypes = List.Zip({ColNames, DataTypes}) //Combine Colnames and Data Types
+in
+    Table.TransformColumnTypes(tbl, Col_and_DataTypes)
