@@ -1,0 +1,26 @@
+(tbl as table)=>
+
+let
+
+// Function to remove empty columns
+fxRemoveEmptyColumns = (tbl as table)=>
+    let
+        GetTableProfile = Table.Profile(tbl),
+        DrillDownToColumnNullCount = Table.SelectColumns(GetTableProfile,{"Column", "NullCount"}),
+        row_count = Table.RowCount(tbl),
+        GetAllNullCount = Table.SelectRows(DrillDownToColumnNullCount, each [NullCount] = row_count),
+        ToRemoveColList = GetAllNullCount[Column]
+        in Table.RemoveColumns(tbl, ToRemoveColList),
+
+// Function to remove empty rows
+fxRemoveEmptyRows = (tbl as table)=>
+    let
+        CountNonNullColumns = Table.AddColumn(tbl, "Custom", each List.NonNullCount(Record.FieldValues(_))), //Check the count of non-null columns
+        RemoveNullRows = Table.SelectRows(CountNonNullColumns, each ([Custom] <> 0)) //Remove records with zero non-null count
+        in
+        Table.RemoveColumns(RemoveNullRows,{"Custom"})
+
+
+// Final Result
+in 
+    fxRemoveEmptyRows(fxRemoveEmptyColumns(tbl))
