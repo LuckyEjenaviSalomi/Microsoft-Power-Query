@@ -1,5 +1,5 @@
 //Automatically Returns Data Type of Tables Dynamically without hardcoding column names
-(tbl as table, N_Rows as nullable number)=>
+(tbl as table, optional N_Rows as number)=>
 let
     firstN = (if N_Rows = null then 100 else N_Rows),
     trim_table_to_rows = Table.FirstN(tbl, firstN), //Get the first N rows of table to speed things up
