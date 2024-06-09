@@ -1,33 +1,10 @@
-//Return a table without empty columns
+//Return a table after removing empty columns
 (tbl as table)=>
-
-let 
-//Function to get all the empty columns
-fxGetEmptyColumns = 
-            (tbl as table)=>
-
-            let ColNames = Table.ColumnNames(tbl),
-
-            //============Function to check if a column is empty
-            fxIsColumnEmpty = 
-                    (tbl as table, colName as text) =>
-                        let
-                            RemovedOtherColumns = Table.Buffer(Table.SelectColumns(tbl,{colName})),
-                            change_col_data_type = Table.TransformColumnTypes(tbl, {colName, type text}),
-                            TrimmedText = Table.TransformColumns(change_col_data_type,{{colName, Text.Trim}}),
-                            ReplacedValue = Table.ReplaceValue(TrimmedText,"",null,Replacer.ReplaceValue,{colName}),
-                            table_to_list = List.Buffer(Table.Column(ReplacedValue, colName))
-                        in
-                            List.MatchesAll(table_to_list, each _ = null),
-            //===========================================================================
-
-            emptyCols = List.Accumulate(
-                ColNames,
-                {}, (state, curr)=> if fxIsColumnEmpty(tbl, curr) then state & {curr} else state & {}
-            )
-
-            in emptyCols
-//=====================================================
-
+let
+    GetTableProfile = Table.Profile(tbl),
+    DrillDownToColumnNullCount = Table.SelectColumns(GetTableProfile,{"Column", "NullCount"}),
+    row_count = Table.RowCount(tbl),
+    GetAllNullCount = Table.SelectRows(DrillDownToColumnNullCount, each [NullCount] = row_count),
+    ToRemoveColList = GetAllNullCount[Column]
 in
-Table.RemoveColumns(tbl, fxGetEmptyColumns(tbl))
+    Table.RemoveColumns(tbl, ToRemoveColList)
