@@ -1,13 +1,14 @@
 //Automatically Returns Data Type of Tables Dynamically without hardcoding column names
 (tbl as table, optional N_Rows as number)=>
 let
-    firstN = ( if N_Rows <> null then N_Rows else Table.RowCount(tbl) ),
-    trim_table_to_rows = Table.FirstN(tbl, firstN), //Get the first N rows of table to speed things up
-    ColNames = Table.ColumnNames(trim_table_to_rows), //Column Names
-    ColValues = List.Transform(Table.ToColumns(trim_table_to_rows), each List.RemoveNulls(_)), //Get Column Values after removing nulls
-    RemoveNulls = List.Transform(ColValues, each List.RemoveNulls(_)), // In case column has preceding null values before a real value
-    FirstItem = List.Transform(RemoveNulls, each if List.Count(_) = 0 then null else List.First(_)), //Return null where column is empty
-    DataTypes = List.Transform(FirstItem, each if _ = null then Any.Type else Value.Type(_)), //Get Data Type based on first value
-    Col_and_DataTypes = List.Zip({ColNames, DataTypes}) //Combine Colnames and Data Types
-in
-    Table.TransformColumnTypes(tbl, Col_and_DataTypes)
+    ColNames = Table.ColumnNames(tbl),
+    N_Rows = (if N_Rows = null then Table.RowCount(tbl) else N_Rows),
+    first_NRows = Table.ToColumns(Table.FirstN(tbl, N_Rows)),
+    RemoveNulls = List.Transform(first_NRows, each List.RemoveNulls(_)),
+    ConvertZerosToNulls = List.Transform(RemoveNulls, (r)=> List.Transform(r, each try (if Number.From(_) = 0 then null else _) otherwise _) ),
+    RemoveNullZeros = List.Transform(ConvertZerosToNulls, each List.RemoveNulls(_)),
+    GetFirstItem = List.Transform(RemoveNullZeros, each List.First(_)),
+    TypeCastNumbers = List.Transform(GetFirstItem, each if _ = null then _ else if Text.StartsWith(_, "0") then _ else (try Number.From(_) otherwise _)),
+    ValueType = List.Transform(TypeCastNumbers, each if _ = null then Any.Type else Value.Type(_)),
+    DataTypes = List.Zip({ColNames, ValueType})
+    in Table.TransformColumnTypes(tbl, DataTypes)
