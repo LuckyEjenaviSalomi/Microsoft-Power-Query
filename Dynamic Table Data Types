@@ -9,6 +9,6 @@ let
     RemoveNullZeros = List.Transform(ConvertZerosToNulls, each List.RemoveNulls(_)),
     GetFirstItem = List.Transform(RemoveNullZeros, each List.First(_)),
     TypeCastNumbers = List.Transform(GetFirstItem, each if _ = null then _ else if Text.StartsWith(_, "0") then _ else (try Number.From(_) otherwise _)),
-    ValueType = List.Transform(TypeCastNumbers, each if _ = null then Any.Type else Value.Type(_)),
+    ValueType = List.Transform(TypeCastNumbers, each if _ = null then type number else Value.Type(_)),
     DataTypes = List.Zip({ColNames, ValueType})
     in Table.TransformColumnTypes(tbl, DataTypes)
