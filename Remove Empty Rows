@@ -2,10 +2,24 @@
 (tbl as table)=>
     let
     Source = tbl,
+    
+    //Function to get initial data types
+    fxGetTableColDataTypes = (tbl as table)=>
+        let
+        //Function to get column type of one column
+        fxGetColDataType = (tbl as table, colName as text)=>
+        Type.TableColumn(Value.Type(tbl), colName),
+        ColNames = Table.ColumnNames(tbl)
+        in List.Transform(ColNames, each {_, fxGetColDataType(tbl, _)}),
+    //--------------------------------
+
+    initial_data_types = fxGetTableColDataTypes(tbl),
     ChangedTypeToText = Table.TransformColumnTypes(Source, List.Transform(Table.ColumnNames(Source), each {_, type text})),
     TrimmedText = Table.TransformColumns(ChangedTypeToText, List.Transform(Table.ColumnNames(Source), each {_, Text.Trim, type text})),
     ReplacedValue = Table.ReplaceValue(TrimmedText,"",null,Replacer.ReplaceValue, Table.ColumnNames(Source)),
     replace_empties = Table.ReplaceValue(ReplacedValue," ", null, Replacer.ReplaceValue, Table.ColumnNames(ReplacedValue)),
         CountNonNullColumns = Table.AddColumn(replace_empties, "Custom", each List.NonNullCount(Record.FieldValues(_))), //Check the count of non-null columns
-        RemoveNullRows = Table.SelectRows(CountNonNullColumns, each ([Custom] <> 0)) //Remove records with zero non-null count
-        in Table.RemoveColumns(RemoveNullRows,{"Custom"})
+        RemoveNullRows = Table.SelectRows(CountNonNullColumns, each ([Custom] <> 0)), //Remove records with zero non-null count
+        revert_to_original_dtypes = Table.TransformColumnTypes(RemoveNullRows, initial_data_types)
+
+        in Table.RemoveColumns(revert_to_original_dtypes, {"Custom"})
