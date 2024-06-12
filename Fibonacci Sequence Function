@@ -13,8 +13,8 @@ let
     index_col_name = if index_col_name = null then "Index" else index_col_name,
 
     RenamedColumns = Table.RenameColumns(Converted_to_Table,{{"Column1", fibonaci_num_col_name}}),
-    ChangedType = Table.TransformColumnTypes(RenamedColumns,{{fibonaci_num_col_name, Int64.Type}}),
-    AddedIndex = Table.AddIndexColumn(ChangedType, index_col_name, 1, 1, Int64.Type),
+    ChangedType = Table.TransformColumnTypes(RenamedColumns,{{fibonaci_num_col_name, type number}}),
+    AddedIndex = Table.AddIndexColumn(ChangedType, index_col_name, 1, 1, type number),
     ReorderedColumns = Table.ReorderColumns(AddedIndex,{index_col_name, fibonaci_num_col_name})
 in
     ReorderedColumns
