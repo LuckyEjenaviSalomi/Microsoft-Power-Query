@@ -1,0 +1,2 @@
+(tbl as table, colName as text)=>
+Type.TableColumn(Value.Type(tbl), colName)
