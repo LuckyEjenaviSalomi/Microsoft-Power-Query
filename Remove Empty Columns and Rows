@@ -4,13 +4,14 @@ let
 
 // Function to remove empty columns
 fxRemoveEmptyColumns = (tbl as table)=>
-    let
-        GetTableProfile = Table.Profile(tbl),
-        DrillDownToColumnNullCount = Table.SelectColumns(GetTableProfile,{"Column", "NullCount"}),
-        row_count = Table.RowCount(tbl),
-        GetAllNullCount = Table.SelectRows(DrillDownToColumnNullCount, each [NullCount] = row_count),
-        ToRemoveColList = GetAllNullCount[Column]
-        in Table.RemoveColumns(tbl, ToRemoveColList),
+    replace_empties = Table.ReplaceValue(tbl," ", null, Replacer.ReplaceValue, Table.ColumnNames(tbl)),
+    GetTableProfile = Table.Profile(replace_empties),
+    DrillDownToColumnNullCount = Table.SelectColumns(GetTableProfile,{"Column", "NullCount"}),
+    row_count = Table.RowCount(tbl),
+    GetAllNullCount = Table.SelectRows(DrillDownToColumnNullCount, each [NullCount] = row_count),
+    ToRemoveColList = GetAllNullCount[Column]
+in
+    Table.RemoveColumns(tbl, ToRemoveColList),
 
 // Function to remove empty rows
 fxRemoveEmptyRows = (tbl as table)=>
