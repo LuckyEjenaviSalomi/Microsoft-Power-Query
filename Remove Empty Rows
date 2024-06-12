@@ -1,7 +1,11 @@
 // return a table with empty rows removed
 (tbl as table)=>
-let
-    replace_empties = Table.ReplaceValue(tbl," ", null, Replacer.ReplaceValue, Table.ColumnNames(tbl)),
-    table_profile = Table.Profile(replace_empties),
-    RemovedOtherColumns = Table.SelectColumns(table_profile,{"Column", "NullCount"})
-    in Table.SelectRows(RemovedOtherColumns, each ([NullCount] = Table.RowCount(tbl)))[Column]
+    let
+    Source = tbl,
+    ChangedTypeToText = Table.TransformColumnTypes(Source, List.Transform(Table.ColumnNames(Source), each {_, type text})),
+    TrimmedText = Table.TransformColumns(ChangedTypeToText, List.Transform(Table.ColumnNames(Source), each {_, Text.Trim, type text})),
+    ReplacedValue = Table.ReplaceValue(TrimmedText,"",null,Replacer.ReplaceValue, Table.ColumnNames(Source)),
+    replace_empties = Table.ReplaceValue(ReplacedValue," ", null, Replacer.ReplaceValue, Table.ColumnNames(ReplacedValue)),
+        CountNonNullColumns = Table.AddColumn(replace_empties, "Custom", each List.NonNullCount(Record.FieldValues(_))), //Check the count of non-null columns
+        RemoveNullRows = Table.SelectRows(CountNonNullColumns, each ([Custom] <> 0)) //Remove records with zero non-null count
+        in Table.RemoveColumns(RemoveNullRows,{"Custom"})
