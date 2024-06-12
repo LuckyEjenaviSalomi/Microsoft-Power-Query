@@ -1,7 +1,11 @@
 //Return a table after removing empty columns
 (tbl as table)=>
 let
-    replace_empties = Table.ReplaceValue(tbl," ", null, Replacer.ReplaceValue, Table.ColumnNames(tbl)),
+    colNames = Table.ColumnNames(tbl),
+    ChangedTypeToText = Table.TransformColumnTypes(tbl, List.Transform(colNames, each {_, type text})),
+    TrimmedText = Table.TransformColumns(ChangedTypeToText, List.Transform(colNames, each {_, Text.Trim, type text})),
+    ReplacedValue = Table.ReplaceValue(TrimmedText,"",null,Replacer.ReplaceValue, colNames),
+    replace_empties = Table.ReplaceValue(ReplacedValue," ", null, Replacer.ReplaceValue, colNames),
     GetTableProfile = Table.Profile(replace_empties),
     DrillDownToColumnNullCount = Table.SelectColumns(GetTableProfile,{"Column", "NullCount"}),
     row_count = Table.RowCount(tbl),
