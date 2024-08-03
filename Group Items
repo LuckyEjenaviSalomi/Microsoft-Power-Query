@@ -1,0 +1,16 @@
+(tbl as table, TargetColName as text)=> 
+let
+    Source = tbl,
+    BaseColNames = Table.ColumnNames(Source),
+    AddedIndex = Table.AddIndexColumn(Source, "Index", 0, 1, Int64.Type),
+    AddedCustom = Table.AddColumn(
+        AddedIndex, "Custom", 
+        each if (try Table.Column(AddedIndex, TargetColName){[Index]-1} = Table.Column(AddedIndex, TargetColName){[Index]} otherwise false) 
+                then null else Record.Field(_, TargetColName)),
+    RemoveTargetCol = Table.RemoveColumns(AddedCustom, {TargetColName}),
+    RenameTargetCol = Table.RenameColumns(RemoveTargetCol,{{"Custom", TargetColName}}),
+    DataTypeTargetCol = Type.TableColumn(Value.Type(Source), TargetColName),
+    ChangedType_TargetCol = Table.TransformColumnTypes(RenameTargetCol,{{TargetColName,  DataTypeTargetCol}}),
+    RevertToBaseColumns = Table.SelectColumns(ChangedType_TargetCol, BaseColNames, MissingField.Ignore)
+in
+    RevertToBaseColumns
