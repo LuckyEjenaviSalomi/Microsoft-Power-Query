@@ -1,0 +1,7 @@
+// Function returns the existing data types of columns
+(tbl as table)=>
+let 
+    dt = (tbl as table, colName as text) =>  // Intermediate function returns the Data Type of a column
+    Type.TableColumn(Value.Type(tbl), colName)
+in
+    List.Transform(Table.ColumnNames(tbl), each {_, dt(tbl, _)})
