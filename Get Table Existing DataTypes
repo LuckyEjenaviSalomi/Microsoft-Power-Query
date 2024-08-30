@@ -1,4 +1,4 @@
-// Function returns the existing data types of columns
+// Function returns the existing data types of columns as list
 (tbl as table)=>
 let 
     dt = (tbl as table, colName as text) =>  // Intermediate function returns the Data Type of a column
