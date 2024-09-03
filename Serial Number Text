@@ -1,0 +1,10 @@
+// function returns text split into multiple lines with serial number
+(txt as text)=>
+let
+    SplitText = Text.Split(txt, "#(lf)"),
+    NumberText = List.Accumulate(
+    {0..List.Count(SplitText) - 1}, {}, (s, c)=> s & {Text.From(c+1) & ". " & Text.Trim(SplitText{c})}
+),
+    CombineText = Text.Combine(NumberText, "#(lf)")
+in
+    CombineText
