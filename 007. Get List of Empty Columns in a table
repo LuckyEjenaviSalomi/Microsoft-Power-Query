@@ -1,0 +1,13 @@
+// Returns as list of empty columns in a table
+(tbl as table)=>
+let
+    colNames = Table.ColumnNames(tbl),
+    ChangedTypeToText = Table.TransformColumnTypes(tbl, List.Transform(colNames, each {_, type text})),
+    TrimmedText = Table.TransformColumns(ChangedTypeToText, List.Transform(colNames, each {_, Text.Trim, type text})),
+    ReplacedValue = Table.ReplaceValue(TrimmedText,"",null,Replacer.ReplaceValue, colNames),
+    replace_empties = Table.ReplaceValue(ReplacedValue," ", null, Replacer.ReplaceValue, colNames),
+    GetTableProfile = Table.Profile(replace_empties),
+    DrillDownToColumnNullCount = Table.SelectColumns(GetTableProfile,{"Column", "NullCount"}),
+    row_count = Table.RowCount(tbl),
+    GetAllNullCount = Table.SelectRows(DrillDownToColumnNullCount, each [NullCount] = row_count)
+    in GetAllNullCount[Column]

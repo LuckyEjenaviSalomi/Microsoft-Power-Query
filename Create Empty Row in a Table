@@ -1,0 +1,11 @@
+(tbl as table)=>
+let
+    Source = tbl,
+    ColNames = Table.ColumnNames(Source),
+    ColDataTypes = List.Transform(ColNames, each {_, Type.TableColumn(Value.Type(Source), _)}),
+    EmptyRec = let emptyRec = List.Accumulate(
+    ColNames, [], (s, c)=> Record.AddField(s, c, null)
+) in Table.FromRecords({emptyRec}),
+    RevertDataTypes = Table.TransformColumnTypes(EmptyRec, ColDataTypes)
+in
+    RevertDataTypes

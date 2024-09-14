@@ -4,6 +4,7 @@ let
     ColNames = Table.ColumnNames(Source),
     Replaced_Value = List.Accumulate(
                     ColNames, Source, 
-                    (state, curr)=> Table.ReplaceValue(state, value_or_text_to_replace, new_value_or_text, Replacer.ReplaceText,{curr}))
+                    (state, curr)=> Table.ReplaceValue(state, 
+                            value_or_text_to_replace, new_value_or_text, Replacer.ReplaceText,{curr}))
 in
     Replaced_Value

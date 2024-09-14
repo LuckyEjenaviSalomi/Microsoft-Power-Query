@@ -1,0 +1,31 @@
+//Return a table after removing empty columns
+(tbl as table)=>
+let
+    colNames = Table.ColumnNames(tbl),
+
+    //Function to get initial data types
+    fxGetTableColDataTypes = (tbl as table)=>
+        let
+        //Function to get column type of one column
+        fxGetColDataType = (tbl as table, colName as text)=>
+        Type.TableColumn(Value.Type(tbl), colName),
+        ColNames = Table.ColumnNames(tbl)
+        in List.Transform(ColNames, each {_, fxGetColDataType(tbl, _)}),
+    //--------------------------------
+
+    ChangedTypeToText = Table.TransformColumnTypes(tbl, List.Transform(colNames, each {_, type text})),
+    TrimmedText = Table.TransformColumns(ChangedTypeToText, List.Transform(colNames, each {_, Text.Trim, type text})),
+    ReplacedValue = Table.ReplaceValue(TrimmedText,"", null, Replacer.ReplaceValue, colNames),
+    replace_empties = Table.ReplaceValue(ReplacedValue," ", null, Replacer.ReplaceValue, colNames),
+    GetTableProfile = Table.Profile(replace_empties),
+    DrillDownToColumnNullCount = Table.SelectColumns(GetTableProfile,{"Column", "NullCount"}),
+    row_count = Table.RowCount(tbl),
+    GetAllNullCount = Table.SelectRows(DrillDownToColumnNullCount, each [NullCount] = row_count),
+    ToRemoveColList = GetAllNullCount[Column],
+
+    //Get the original column types of non-null columns
+    non_null_column_names = List.Difference(Table.ColumnNames(tbl), ToRemoveColList), //get non-null column names
+    non_null_table = Table.SelectColumns(tbl, non_null_column_names), //get original table without non-null columns
+    initial_dtypes = fxGetTableColDataTypes(non_null_table) //Get inital data types of non-null columns
+in
+    Table.TransformColumnTypes(non_null_table, initial_dtypes) //Get original table, after removing null columns and reverting to initial column types
