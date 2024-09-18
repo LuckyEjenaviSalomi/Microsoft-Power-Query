@@ -20,4 +20,4 @@ let
                 ) & {RT_List}, Table.ColumnNames(TabName) & {Added_Col_RT_Name}
                 )
 in
-    Consolidate
+    Table.TransformColumnTypes(Consolidate, {List.Last(Table.ColumnNames(Consolidate)), type number} ) // change the column type of the added column
