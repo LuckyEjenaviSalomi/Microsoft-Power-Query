@@ -1,5 +1,6 @@
 These folders contained series of reusable functions I have worked with in Power Query that could be copied and used by any other person. I will adding more and updating the existing ones as I encountered challenges and gain more mastery. Feel free to use as you see fit. Happy M-coding.
 <ol>
+  <li> <strong>Evaluation: </strong> Functions returns a value or boolean after evaluating an expression. </li>
   <li><strong>
     Tables:
   </strong> 
