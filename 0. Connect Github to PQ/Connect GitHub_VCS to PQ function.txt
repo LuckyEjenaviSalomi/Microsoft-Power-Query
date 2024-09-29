@@ -1,0 +1,8 @@
+(path as text, optional IsWeb as any)=>
+
+let 
+    Web = (if IsWeb = null then true else false),
+    Source = Text.FromBinary( if Web then Web.Contents(path) else File.Contents(path) ),
+    EvaluatedExp = Expression.Evaluate(Source, #shared)
+    in 
+EvaluatedExp
