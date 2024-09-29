@@ -1,17 +1,14 @@
-/*
-    Function returns dynamic data types of Power Query Table.
-    `tbl`: a table
-    `exclude_cols`: list of column names to exclude
-    `N_rows`: number of first rows to evaluate
-*/
-(tbl as table, optional exclude_cols as any, optional N_rows as nullable number)=>
 let
-    //remove exclude_cols
-    ColNames = if Value.Is(exclude_cols, type list) then List.Difference(List.Buffer(Table.ColumnNames(tbl)), exclude_cols)
-                else Table.ColumnNames(tbl),
-    N_rows = (if N_rows = null then 100 else N_rows), //Select the first 100 rows if N_rows is not specified
+    exclude_col = {"RefDocNo"},
+    tbl = BudgetCommitmentItem,
+
+    ColNames = List.Difference(List.Buffer(Table.ColumnNames(tbl)), exclude_col), //Exclude specified columns
+
+    // N_Rows = (if N_Rows = null then Table.RowCount(tbl) else N_Rows),
+    N_Rows = 10, //Table.RowCount(tbl),
+
     tbl_focus = Table.Buffer(Table.SelectColumns(tbl, ColNames)), //Focus table after excluding specified columns
-    first_NRows = List.Buffer(Table.ToColumns(Table.FirstN(tbl_focus, N_rows))),
+    first_NRows = List.Buffer(Table.ToColumns(Table.FirstN(tbl_focus, N_Rows))),
     RemoveNulls = List.Transform(first_NRows, each List.RemoveNulls(_)),
     RemoveNullZeros = List.Transform(RemoveNulls, each List.RemoveNulls(_)),
     GetFirstItem = List.Transform(RemoveNullZeros, each List.First(_)),
@@ -23,16 +20,12 @@ let
                     if Value.Is(Number.From(_), type number) and Text.StartsWith(_, "0") and Number.From(_) <> 0 then _ else Number.From(_) 
                     ) 
                 otherwise (
-                        try Date.From(_) //Convert date in text format to date, e.g, 09.04.2024
+                        try (if not Value.Is(_, type number) then Date.From(_) else Number.From(_) ) //Convert date in text format to date, e.g, 09.04.2024
                         otherwise _
                 )
             ),
 
-    ValueType = List.Transform(TypeCastNumbers, each 
-            if _ = null then type any 
-            else 
-                if Value.Is(_, type number) and Number.Mod(_, Int64.From(_)) = 0 then Int64.Type //Check if number is an integer
-                else Value.Type(_) ),
+    ValueType = List.Transform(TypeCastNumbers, each if _ = null then type any else if Value.Is(_, type number) and Number.Mod(_, Int64.From(_)) = 0 then Int64.Type else Value.Type(_) ),
     ColNames_Types = List.Zip({ColNames, ValueType}),
     Result = Table.TransformColumnTypes(tbl, ColNames_Types)
 in
