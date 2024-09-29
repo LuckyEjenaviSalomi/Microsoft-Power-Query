@@ -1,9 +1,10 @@
 /*
     Function returns dynamic data types of Power Query Table.
     `tbl`: a table
-    `exclude_cols`: list of column names to exclude
-    `N_rows`: number of first rows to evaluate
+    `exclude_cols`: list of column names to exclude from data type conversion
+    `N_rows`: number of first rows to evaluate - defaulted to 10
 */
+
 (tbl as table, optional exclude_cols as any, optional N_rows as nullable number)=>
 let
     //remove exclude_cols
