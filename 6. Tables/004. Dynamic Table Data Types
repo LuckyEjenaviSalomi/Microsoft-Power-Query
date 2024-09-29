@@ -1,5 +1,5 @@
 /*
-    Function returns dynamic data types of Power Query Table.
+    Function returns dynamic data types of Power Query Table with optional parameter to exclude some columns
     `tbl`: a table
     `exclude_cols`: list of column names to exclude from data type conversion
     `N_rows`: number of first rows to evaluate - defaulted to 10
@@ -19,7 +19,7 @@ let
     TypeCastNumbers = List.Transform(GetFirstItem, each 
             if Value.Is(_, type date) then _ // Leave date untouched
             else
-                //Test if number starts with 0 and not equal to 0, then leave as text, else convert to number
+                //Test if number starts with 0 and not equal to 0 - for codes starting with 0, then leave as text, else convert to number
                 try ( 
                     if Value.Is(Number.From(_), type number) and Text.StartsWith(_, "0") and Number.From(_) <> 0 then _ else Number.From(_) 
                     ) 
