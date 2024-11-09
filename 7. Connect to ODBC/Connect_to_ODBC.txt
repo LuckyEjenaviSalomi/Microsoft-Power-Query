@@ -1,0 +1,9 @@
+(accessdb_path as text, SQLString as text)=>
+let
+
+Source = Odbc.Query("DBQ=" & 
+        accessdb_path & ";Driver={Microsoft Access Driver (*.mdb, *.accdb)};" & 
+        "DriverId=25;FIL=MS Access;MaxBufferSize=2048;PageTimeout=5;ReadOnly=1;ExtendedAnsiSQL=1;",  SQLString)
+
+in
+Source
