@@ -1,0 +1,10 @@
+(tbl as table, optional serialnum_col as nullable text,optional start as nullable number, optional step as nullable number)=>
+
+let
+new_col = (if serialnum_col = null then "S/N" else serialnum_col),
+start_num = (if start = null then 1 else start),
+step_num = (if step = null then 1 else step),
+AddedIndex = Table.AddIndexColumn(tbl, new_col, start_num, step_num, Int64.Type),
+ReorderedColumns = Table.ReorderColumns(AddedIndex,{new_col} & Table.ColumnNames(tbl))
+in
+ReorderedColumns
