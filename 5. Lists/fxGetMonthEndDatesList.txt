@@ -1,0 +1,13 @@
+// Returns list of month end dates based on a start date and number of months
+(start_date as date, n_months as number)=>
+
+let
+    Source = List.Generate(
+        ()=>[d = 1, date = Date.EndOfMonth(start_date) ],
+        each [d] <= n_months,
+        each [date = Date.EndOfMonth(Date.AddMonths([date], 1)), d = [d]+1],
+        each [date]
+    )
+
+in
+    Source
