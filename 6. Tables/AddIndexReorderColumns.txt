@@ -1,0 +1,21 @@
+let
+    Source = (tbl as table, columns_first as nullable list)=>
+
+let
+    IndexColName = "S/N",
+    AddIndex = Table.AddIndexColumn(tbl, IndexColName, 1, 1, Int64.Type), //Add Index Column
+
+    column_names = Table.ColumnNames(AddIndex),
+    first_columns = {IndexColName} & (columns_first ?? {}),
+
+    // Get the last column names
+        last_columns = List.RemoveItems(column_names, first_columns),
+
+    // Re-order the column names
+        re_ordered_columns = first_columns & last_columns
+
+// Return the Re-ordered column Table
+in
+    Table.ReorderColumns(AddIndex, re_ordered_columns)
+in
+    Source
