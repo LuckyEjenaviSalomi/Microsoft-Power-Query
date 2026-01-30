@@ -4,7 +4,7 @@ IsWeb = specify if the path is from the web or not. True is the default indicati
 
 (path as text, optional IsWeb as any)=>
 let 
-    Web = (if IsWeb = null then true else false),
+    Web = (IsWeb??true), //Coalesce optional parameter
     Source = Text.FromBinary( if Web then Web.Contents(path) else File.Contents(path) ),
     EvaluatedExp = Expression.Evaluate(Source, #shared)
     in 
