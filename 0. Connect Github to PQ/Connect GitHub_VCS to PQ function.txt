@@ -1,3 +1,4 @@
+// Takes in a custom function's URL or file path from your PC and output the function's arguments for use
 (path as text, optional IsWeb as any)=>
 
 let 
