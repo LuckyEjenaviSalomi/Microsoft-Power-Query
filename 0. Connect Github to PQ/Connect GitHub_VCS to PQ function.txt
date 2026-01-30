@@ -1,5 +1,8 @@
-(path as text, optional IsWeb as any)=>
+/*Takes in a custom's functions raw URL path or local PC file path and output the functions arguments for use in a Power Query project.
+IsWeb = specify if the path is from the web or not. True is the default indicating path is from the web
+*/
 
+(path as text, optional IsWeb as any)=>
 let 
     Web = (if IsWeb = null then true else false),
     Source = Text.FromBinary( if Web then Web.Contents(path) else File.Contents(path) ),
