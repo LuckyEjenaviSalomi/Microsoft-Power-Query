@@ -1,0 +1,15 @@
+(tbl as table)=>
+
+let 
+Source = tbl,
+colNames = Table.ColumnNames(tbl), //Column Names
+unwantedChars = {"`","(i)", "(ii)", "(iii)", "(iv)", "(v)", "(vi)", "(vii)", ""},
+
+replaceUnwantedChar = 
+
+            Table.TransformColumns(
+                Source, List.Transform(colNames, (r)=> { r, each (if _ = null then null else List.Accumulate(unwantedChars, _, (s,c)=> Replacer.ReplaceValue(s, c, null) )  )  })
+            )
+in
+
+replaceUnwantedChar
