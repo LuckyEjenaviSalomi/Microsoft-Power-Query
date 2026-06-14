@@ -1,0 +1,3 @@
+(list1 as list, list2 as list)=>
+
+not List.IsEmpty(List.Intersect({ list1, list2}))
