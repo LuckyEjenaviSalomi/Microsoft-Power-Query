@@ -1,5 +1,4 @@
 (url as text)=>
 
 //Url example: "https://nnpcgroup.sharepoint.com/sites/InternalAuditDivision/teammate/"
-SharePoint.Files(
-"https://nnpcgroup.sharepoint.com/sites/InternalAuditDivision/teammate/", [ApiVersion = 15])
+SharePoint.Files(url, [ApiVersion = 15])
